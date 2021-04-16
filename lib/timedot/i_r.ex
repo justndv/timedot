@@ -38,50 +38,54 @@ defmodule Timedot.IR do
            ""
 
          {:day, d} ->
-           date_line =
-             if Map.has_key?(d, :year) do
-               year = Integer.to_string(Map.fetch!(d, :year)) |> String.pad_leading(4, "0")
-               year <> "-"
-             else
-               ""
-             end
-
-           %{day: day, month: month, entries: entries} = d
-
-           [month, day] =
-             Enum.map([month, day], fn v ->
-               Integer.to_string(v) |> String.pad_leading(2, "0")
-             end)
-
-           optional_comment = Map.get(d, :comment, "")
-
-           optional_comment =
-             if String.length(optional_comment) > 0 do
-               " # #{optional_comment}"
-             else
-               optional_comment
-             end
-
-           date_line = date_line <> "#{month}-#{day}#{optional_comment}\n"
-
-           date_line <>
-             (Enum.map(entries, fn entry ->
-                case entry do
-                  {:comment, comment} ->
-                    "# #{comment}"
-
-                  {:entry, %{account: account, quantity: quantity, comment: comment}} ->
-                    "#{account}  #{quantity_to_string(quantity)} # #{comment}"
-
-                  {:entry, %{account: account, quantity: quantity}} ->
-                    "#{account}  #{quantity_to_string(quantity)}"
-                end
-              end)
-              |> Enum.join("\n"))
+           day_to_string(d)
        end
      end
      |> Enum.join("\n")) <>
       "\n"
+  end
+
+  defp day_to_string(d) do
+    date_line =
+      if Map.has_key?(d, :year) do
+        year = Integer.to_string(Map.fetch!(d, :year)) |> String.pad_leading(4, "0")
+        year <> "-"
+      else
+        ""
+      end
+
+    %{day: day, month: month, entries: entries} = d
+
+    [month, day] =
+      Enum.map([month, day], fn v ->
+        Integer.to_string(v) |> String.pad_leading(2, "0")
+      end)
+
+    optional_comment = Map.get(d, :comment, "")
+
+    optional_comment =
+      if String.length(optional_comment) > 0 do
+        " # #{optional_comment}"
+      else
+        optional_comment
+      end
+
+    date_line = date_line <> "#{month}-#{day}#{optional_comment}\n"
+
+    date_line <>
+      (Enum.map(entries, fn entry ->
+         case entry do
+           {:comment, comment} ->
+             "# #{comment}"
+
+           {:entry, %{account: account, quantity: quantity, comment: comment}} ->
+             "#{account}  #{quantity_to_string(quantity)} # #{comment}"
+
+           {:entry, %{account: account, quantity: quantity}} ->
+             "#{account}  #{quantity_to_string(quantity)}"
+         end
+       end)
+       |> Enum.join("\n"))
   end
 
   @spec quantity_to_string(quantity()) :: String.t()
